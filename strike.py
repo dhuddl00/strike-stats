@@ -6,17 +6,58 @@ import time
 from google.appengine.ext import db
 from google.appengine.api import users
 
+HEADER_HTML='''
+<html>
+    <head>
+        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    </head>
+    <body>
+        <div style="padding-left:25px">
+            <div>
+                <h1>S.T.R.I.K.E</h1>
+            </div>
+'''
+
+FOOTER_HTML='''
+        </div>
+    </body>
+</html>
+'''
+
 class MainPageController(webapp2.RequestHandler):
     def get(self):
-        self.response.write('''
-<html><body><h1>S.T.R.I.K.E</h1></body></html>
-''')
+        self.response.write(HEADER_HTML + FOOTER_HTML)
 
-class ProgramListController(webapp2.RequestHandler):
+class GameListPageController(webapp2.RequestHandler):
     def get(self):
-        e = Program.all()
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.write(json.dumps(e.to_dict()))
+        bodyHtml = '''<table class="pure-table pure-table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Program</th>
+                                <th>Opponent</th>
+                                <th>Date</th>
+                                <th>Link</th>
+                            </tr>
+                        </thead>'''  
+        bodyHtml += '<tbody>'
+        for e in Game.all():
+            bodyHtml += '<tr><td>' + str(e.program.name) + \
+                        '</td><td>' + e.opponent + \
+                        '</td><td>' + e.game_date + \
+                        '</td><td><a href="' + webapp2.uri_for('games')  + "/" + str(e.key().id_or_name()) + '">Go</a></td></tr>'
+        bodyHtml += '</tbody></table>' 
+        self.response.write(HEADER_HTML + bodyHtml + FOOTER_HTML)
+
+class GamePageController(webapp2.RequestHandler):
+    def get(self, game_id):
+        game = Game.get_by_id(int(game_id))
+        bodyHtml = '<div>' + \
+                        '<span style="padding-right:25px">' + game.program.name+ '</span>'\
+                        '<span style="padding-right:25px">vs</span>'\
+                        '<span style="padding-right:25px">' + game.opponent + '</span>'\
+                        '<div>' + game.game_date + '</div>'\
+                    '</div>'
+        self.response.write(HEADER_HTML + bodyHtml + FOOTER_HTML)
 
 class ApiProgramController(webapp2.RequestHandler):
     def get(self, program_id):
@@ -80,7 +121,6 @@ class ApiPitcherInningListController(webapp2.RequestHandler):
         jo['create_time']=datetime.datetime.now()
         g=Game.get_by_id(jo['game'])
         jo.pop('game',None)
-#        jo['create_user']=users.get_current_user().email()
         se = PitcherInning(game=g,**jo)
         se.put() 
         self.response.headers['Content-Type'] = 'application/json'
@@ -127,15 +167,10 @@ def model_to_dict(model):
     if value is None or isinstance(value, SIMPLE_TYPES):
       output[key] = value
     elif isinstance(value, datetime.date):
-      # Convert date/datetime to simple string representation
-      #ms = time.mktime(value.utctimetuple()) * 1000
-      #ms += getattr(value, 'microseconds', 0) / 1000
-      #output[key] = int(ms)
       output[key] = str(value)
     elif isinstance(value, db.GeoPt):
       output[key] = {'lat': value.lat, 'lon': value.lon}
     elif isinstance(value, db.Model):
-#      output[key] = value.to_dict()
       output[key] = value.key().id_or_name()
     else:
       raise ValueError('cannot encode ' + repr(prop))
@@ -145,12 +180,14 @@ def model_to_dict(model):
 #####
 application = webapp2.WSGIApplication(
     [webapp2.Route('/', handler=MainPageController, name='home'),
-     webapp2.Route('/api/PitcherInnings', handler=ApiPitcherInningListController, name='api_pitcher_innings'),
-     webapp2.Route('/api/PitcherInnings/(\d+)', handler=ApiPitcherInningController),
-     webapp2.Route('/api/Programs', handler=ApiProgramListController, name='api_programs'),
-     webapp2.Route('/api/Programs/(\d+)', handler=ApiProgramController, name='api_programs'),
-     webapp2.Route('/api/Games', handler=ApiGameListController, name='api_games'),
-     webapp2.Route('/api/Games/(\d+)', handler=ApiGameController)
+     webapp2.Route('/Games', handler=GameListPageController, name='games'),
+     ('/Games/(\d+)', GamePageController),
+     ('/api/PitcherInnings', ApiPitcherInningListController),
+     ('/api/PitcherInnings/(\d+)', ApiPitcherInningController),
+     ('/api/Programs', ApiProgramListController),
+     ('/api/Programs/(\d+)', ApiProgramController),
+     ('/api/Games', ApiGameListController),
+     ('/api/Games/(\d+)', ApiGameController)
     ], debug=True)
 
 
