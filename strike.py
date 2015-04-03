@@ -10,6 +10,14 @@ HEADER_HTML='''
 <html>
     <head>
         <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+        <style>
+          .center {
+            margin-left: auto;
+            margin-right: auto;
+            width: 70%;
+            background-color: #b0e0e6;
+          }
+        </style>
     </head>
     <body>
         <div style="padding-left:25px">
@@ -22,6 +30,85 @@ FOOTER_HTML='''
         </div>
     </body>
 </html>
+'''
+
+ENTRY_FORM_HTML='''
+<form class="pure-form">
+  <fieldset>
+    <table class="pure-table">
+      <tbody>
+        <tr>
+          <th>Pitcher:</th>
+          <td>
+            <span id="in_pitcher"></span>
+          </td>
+        </tr>
+        <tr>
+          <th>Inning:</th>
+          <td>
+            <select id="in_inning">
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5</option>
+              <option>6</option>
+              <option>7</option>
+              <option>8</option>
+              <option>9</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Shutdown:</th>
+          <td>
+            <input id="in_shutdown" type="checkbox">
+          </td>
+        </tr>
+        <tr>
+          <th>Less than 13 pitches:</th>
+          <td>
+            <input id="in_less_than_13_pitches" type="checkbox">
+          </td>
+        </tr>
+        <tr>
+          <th>Retired First Batter:</th>
+          <td>
+            <input id="in_retired_first_batter" type="checkbox">
+          </td>
+        </tr>
+        <tr>
+          <th>Three and out:</th>
+          <td>
+            <input id="in_three_and_out" type="checkbox">
+          </td>
+        </tr>
+        <tr>
+          <th>Strikeouts:</th>
+          <td>
+            <select id="in_strikeouts">
+              <option>0</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Ended Inning:</th>
+          <td>
+            <input id="in_ended_inning" type="checkbox">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" class="center">
+            <a class="pure-button" href="#">Submit</a></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </fieldset>
+</form>
 '''
 
 class MainPageController(webapp2.RequestHandler):
@@ -55,8 +142,10 @@ class GamePageController(webapp2.RequestHandler):
                         '<span style="padding-right:25px">' + game.program.name+ '</span>'\
                         '<span style="padding-right:25px">vs</span>'\
                         '<span style="padding-right:25px">' + game.opponent + '</span>'\
-                        '<div>' + game.game_date + '</div>'\
                     '</div>'
+
+        bodyHtml += ENTRY_FORM_HTML
+
         self.response.write(HEADER_HTML + bodyHtml + FOOTER_HTML)
 
 class ApiProgramController(webapp2.RequestHandler):
