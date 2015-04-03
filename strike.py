@@ -3,6 +3,8 @@ import json
 import logging
 import datetime
 import time
+import os
+from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 from google.appengine.api import users
 
@@ -32,92 +34,13 @@ FOOTER_HTML='''
 </html>
 '''
 
-ENTRY_FORM_HTML='''
-<form class="pure-form">
-  <fieldset>
-    <table class="pure-table">
-      <tbody>
-        <tr>
-          <th>Pitcher:</th>
-          <td>
-            <span id="in_pitcher"></span>
-          </td>
-        </tr>
-        <tr>
-          <th>Inning:</th>
-          <td>
-            <select id="in_inning">
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-              <option>4</option>
-              <option>5</option>
-              <option>6</option>
-              <option>7</option>
-              <option>8</option>
-              <option>9</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <th>Shutdown:</th>
-          <td>
-            <input id="in_shutdown" type="checkbox">
-          </td>
-        </tr>
-        <tr>
-          <th>Less than 13 pitches:</th>
-          <td>
-            <input id="in_less_than_13_pitches" type="checkbox">
-          </td>
-        </tr>
-        <tr>
-          <th>Retired First Batter:</th>
-          <td>
-            <input id="in_retired_first_batter" type="checkbox">
-          </td>
-        </tr>
-        <tr>
-          <th>Three and out:</th>
-          <td>
-            <input id="in_three_and_out" type="checkbox">
-          </td>
-        </tr>
-        <tr>
-          <th>Strikeouts:</th>
-          <td>
-            <select id="in_strikeouts">
-              <option>0</option>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <th>Ended Inning:</th>
-          <td>
-            <input id="in_ended_inning" type="checkbox">
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" class="center">
-            <a class="pure-button" href="#">Submit</a></div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </fieldset>
-</form>
-'''
-
 class MainPageController(webapp2.RequestHandler):
     def get(self):
         self.response.write(HEADER_HTML + FOOTER_HTML)
 
 class GameListPageController(webapp2.RequestHandler):
     def get(self):
-        bodyHtml = '''<table class="pure-table pure-table-bordered">
+        body_html = '''<table class="pure-table pure-table-bordered">
                         <thead>
                             <tr>
                                 <th>Program</th>
@@ -126,27 +49,31 @@ class GameListPageController(webapp2.RequestHandler):
                                 <th>Link</th>
                             </tr>
                         </thead>'''  
-        bodyHtml += '<tbody>'
+        body_html += '<tbody>'
         for e in Game.all():
-            bodyHtml += '<tr><td>' + str(e.program.name) + \
+            body_html += '<tr><td>' + str(e.program.name) + \
                         '</td><td>' + e.opponent + \
                         '</td><td>' + e.game_date + \
                         '</td><td><a href="' + webapp2.uri_for('games')  + "/" + str(e.key().id_or_name()) + '">Go</a></td></tr>'
-        bodyHtml += '</tbody></table>' 
-        self.response.write(HEADER_HTML + bodyHtml + FOOTER_HTML)
+        body_html += '</tbody></table>' 
+        #template_values = {
+        #    'game_html': body_html
+        #}
+        #path = os.path.join(os.path.dirname(__file__), 'gamelist.html')
+        #self.response.out.write(template.render(path, template_values))
+        self.response.out.write(HEADER_HTML + body_html + FOOTER_HTML)
 
 class GamePageController(webapp2.RequestHandler):
     def get(self, game_id):
         game = Game.get_by_id(int(game_id))
-        bodyHtml = '<div>' + \
-                        '<span style="padding-right:25px">' + game.program.name+ '</span>'\
-                        '<span style="padding-right:25px">vs</span>'\
-                        '<span style="padding-right:25px">' + game.opponent + '</span>'\
-                    '</div>'
 
-        bodyHtml += ENTRY_FORM_HTML
+        template_values = {
+            'program_name': game.program.name,
+            'opponent_name': game.opponent,
+        }
 
-        self.response.write(HEADER_HTML + bodyHtml + FOOTER_HTML)
+        path = os.path.join(os.path.dirname(__file__), 'game.html')
+        self.response.out.write(template.render(path, template_values))
 
 class ApiProgramController(webapp2.RequestHandler):
     def get(self, program_id):
