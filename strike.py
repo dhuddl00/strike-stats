@@ -36,7 +36,8 @@ FOOTER_HTML='''
 
 class MainPageController(webapp2.RequestHandler):
     def get(self):
-        self.response.write(HEADER_HTML + FOOTER_HTML)
+        body_html='<div><a href="' + webapp2.uri_for('games') + '">Games</a></div>'
+        self.response.write(HEADER_HTML + body_html + FOOTER_HTML)
 
 class GameListPageController(webapp2.RequestHandler):
     def get(self):
@@ -66,10 +67,13 @@ class GameListPageController(webapp2.RequestHandler):
 class GamePageController(webapp2.RequestHandler):
     def get(self, game_id):
         game = Game.get_by_id(int(game_id))
+        pitchers = Pitcher.all() #["Bob Jackson", "Sam Walters", "Mike Stevens"]
 
         template_values = {
             'program_name': game.program.name,
             'opponent_name': game.opponent,
+            'pitchers': pitchers,
+            'innings': range(1,9),
         }
 
         path = os.path.join(os.path.dirname(__file__), 'game.html')
@@ -96,6 +100,28 @@ class ApiProgramListController(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.write(js)
         
+class ApiPitcherController(webapp2.RequestHandler):
+    def get(self, pitcher_id):
+        e = Program.get_by_id(int(pitcher_id))
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.write(json.dumps(e.to_dict()))
+
+class ApiPitcherListController(webapp2.RequestHandler):
+    def get(self):
+        entities = Pitcher.all()
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.write(json.dumps([e.to_dict() for e in entities]))
+
+    def post(self):
+        js = self.request.body
+        jo = json.loads(js)
+        jo['create_time']=datetime.datetime.now()
+        p=Program.get_by_id(jo['program_id'])
+        se = Pitcher(program=p,**jo)
+        se.put() 
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.write(js)
+
 class ApiGameController(webapp2.RequestHandler):
     def get(self, game_id):
         e = Game.get_by_id(int(game_id))
@@ -112,8 +138,8 @@ class ApiGameListController(webapp2.RequestHandler):
         js = self.request.body
         jo = json.loads(js)
         jo['create_time']=datetime.datetime.now()
-        p=Program.get_by_id(jo['program'])
-        jo.pop('program',None)
+        p=Program.get_by_id(jo['program_id'])
+        #jo.pop('program',None)
         se = Game(program=p,**jo)
         se.put() 
         self.response.headers['Content-Type'] = 'application/json'
@@ -135,9 +161,9 @@ class ApiPitcherInningListController(webapp2.RequestHandler):
         js = self.request.body
         jo = json.loads(js)
         jo['create_time']=datetime.datetime.now()
-        g=Game.get_by_id(jo['game'])
-        jo.pop('game',None)
-        se = PitcherInning(game=g,**jo)
+        g=Game.get_by_id(jo['game_id'])
+        p=Pitcher.get_by_id(jo['pitcher_id'])
+        se = PitcherInning(game=g,pitcher=p,**jo)
         se.put() 
         self.response.headers['Content-Type'] = 'application/json'
         self.response.write(js)
@@ -158,10 +184,18 @@ class Game(db.Model):
   def to_dict(self):
     return model_to_dict(self)
 
+class Pitcher(db.Model):
+  program = db.ReferenceProperty(Program)
+  name = db.StringProperty(required=True)
+  create_time = db.DateTimeProperty(required=True)
+
+  def to_dict(self):
+    return model_to_dict(self)
+
 class PitcherInning(db.Model):
   game = db.ReferenceProperty(Game)
   inning = db.IntegerProperty(required=True)
-  pitcher = db.StringProperty(required=True)
+  pitcher = db.ReferenceProperty(Pitcher)
   create_time = db.DateTimeProperty(required=True)
   shutdown_inning = db.BooleanProperty(required=True)
   less_than_13_pitches = db.BooleanProperty(required=True)
@@ -203,7 +237,9 @@ application = webapp2.WSGIApplication(
      ('/api/Programs', ApiProgramListController),
      ('/api/Programs/(\d+)', ApiProgramController),
      ('/api/Games', ApiGameListController),
-     ('/api/Games/(\d+)', ApiGameController)
+     ('/api/Games/(\d+)', ApiGameController),
+     ('/api/Pitchers', ApiPitcherListController),
+     ('/api/Pitchers/(\d+)', ApiPitcherController)
     ], debug=True)
 
 

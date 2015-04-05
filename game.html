@@ -1,104 +1,123 @@
 <html>
   <head>
-      <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
-      <script src="../static/game.js"></script>
-      <style>
-        .td_in {
-          text-align:center
-        }
-      </style>
+    <title>S.T.R.I.K.E</title>
+    <link rel="stylesheet" href="//yui.yahooapis.com/pure/0.6.0/pure-min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.6/css/jquery.dataTables.min.css">
+    <script src="../static/jquery-2.1.3.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.6/js/jquery.dataTables.min.js"></script>
+    <script src="../static/game.js"></script>
+    <style>
+      .td-in {
+        text-align:center
+      }
+      .float-left {
+        float: left;
+        margin: 5px;
+        padding: 5px;
+        width: auto;
+        height: auto;
+        border: 1px solid black;
+      } 
+      .div-teams-content {
+        padding: 5px;
+      }
+      .div-page {
+        padding-left: 25px;
+      }
+    </style>
   </head>
   <body>
-    <div style="padding-left:25px">
-      <div>
-        <h1>S.T.R.I.K.E</h1>
+    <div class="div-page">
+      <div id="div-teams" class="row h2">
+         <span class="div-teams-content">{{program_name}}</span>
+         <span class="div-teams-content">vs</span>
+         <span class="div-teams-content">{{opponent_name}}</span>
       </div>
-      <div id="title_div">
-        <h3>
-          <span style="padding-right:10px">{{program_name}}</span>
-          <span style="padding-right:10px">vs</span>
-          <span>{{opponent_name}}</span>
-        </h3>
-        <script>hello();</script>
-      </div>
-    <form class="pure-form">
-      <fieldset>
-        <table class="pure-table pure-table-bordered">
-          <tbody>
-            <tr>
-              <td>Inning:</td>
-              <td class="td_in">
-                <select id="in_inning">
-                 <option>1</option>
-                 <option>2</option>
-                 <option>3</option>
-                 <option>4</option>
-                 <option>5</option>
-                 <option>6</option>
-                 <option>7</option>
-                 <option>8</option>
-                 <option>9</option>
-                </select>
-          </td>
-        </tr>
-        <tr>
-          <td>Pitcher:</td>
-          <td class="td_in">
-            <span id="in_pitcher"></span>
-          </td>
-        </tr>
-        <tr>
-          <td>Shutdown:</td>
-          <td class="td_in">
-            <input id="in_shutdown" type="checkbox">
-          </td>
-        </tr>
-        <tr>
-          <td>Less than 13 pitches:</td>
-          <td class="td_in">
-            <input id="in_less_tdan_13_pitches" type="checkbox">
-          </td>
-   </tr>
-        <tr>
-          <td>Retired First Batter:</td>
-          <td class="td_in">
-            <input id="in_retired_first_batter" type="checkbox">
-          </td>
-        </tr>
-        <tr>
-          <td>Three and out:</td>
-          <td class="td_in">
-            <input id="in_three_and_out" type="checkbox">
-          </td>
-        </tr>
-        <tr>
-          <td>Strikeouts:</td>
-          <td class="td_in">
-            <select id="in_strikeouts">
-              <option>0</option>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <td>Ended Inning:</td>
-          <td class="td_in">
-            <input id="in_ended_inning" type="checkbox">
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" class="td_in">
-            <a class="pure-button" href="#">Submit</a></div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </fieldset>
-</form>
-
+      <div id="div-body" class="row">
+        <div id="div-form" class="col-sm-4">
+          <form class="pure-form">
+            <fieldset>
+              <table class="pure-table pure-table-bordered">
+                <tbody>
+                  <tr>
+                    <td>Inning:</td>
+                    <td class="td-in">
+                      <select id="in_inning">
+                      {% for inning in innings %}
+                        <option>{{ inning }}</option>
+                      {% endfor %}
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Pitcher:</td>
+                    <td class="td-in">
+                      <select id="in_pitcher">
+                        {% for pitcher in pitchers %}
+                        <option> {{ pitcher.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Shutdown:</td>
+                    <td class="td-in">
+                      <input id="in_shutdown" type="checkbox">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Less than 13 pitches:</td>
+                    <td class="td-in">
+                      <input id="in_less_tdan_13_pitches" type="checkbox">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Retired First Batter:</td>
+                    <td class="td-in">
+                      <input id="in_retired_first_batter" type="checkbox">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Three and out:</td>
+                    <td class="td-in">
+                      <input id="in_three_and_out" type="checkbox">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Strikeouts:</td>
+                    <td class="td-in">
+                      <select id="in_strikeouts">
+                        <option>0</option>
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Ended Inning:</td>
+                    <td class="td-in">
+                      <input id="in_ended_inning" type="checkbox">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2" class="td-in">
+                      <a class="pure-button" href="#">Submit</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </fieldset>
+          </form>
         </div>
-    </body>
+        <div id="div-entries-table" class="col-sm-4">
+              <table id="entries-table" class="pure-table pure-table-bordered">
+              <tbody></tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
 
