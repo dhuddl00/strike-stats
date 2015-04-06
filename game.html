@@ -41,6 +41,12 @@
               <table class="pure-table pure-table-bordered">
                 <tbody>
                   <tr>
+                    <td>Game:</td>
+                    <td class="td-in">
+                      <input id="in_game_id" type="text" value="{{ game_id }}" readonly></input>
+                    </td>
+                  </tr>
+                  <tr>
                     <td>Inning:</td>
                     <td class="td-in">
                       <select id="in_inning">
@@ -53,9 +59,9 @@
                   <tr>
                     <td>Pitcher:</td>
                     <td class="td-in">
-                      <select id="in_pitcher">
+                      <select id="in_pitcher_id">
                         {% for pitcher in pitchers %}
-                        <option> {{ pitcher.name }}</option>
+                        <option value="{{ pitcher.id }}"> {{ pitcher.name }}</option>
                         {% endfor %}
                       </select>
                     </td>
@@ -63,17 +69,17 @@
                   <tr>
                     <td>Shutdown:</td>
                     <td class="td-in">
-                      <input id="in_shutdown" type="checkbox">
+                      <input id="in_shutdown_inning" type="checkbox">
                     </td>
                   </tr>
                   <tr>
                     <td>Less than 13 pitches:</td>
                     <td class="td-in">
-                      <input id="in_less_tdan_13_pitches" type="checkbox">
+                      <input id="in_less_than_13_pitches" type="checkbox">
                     </td>
                   </tr>
                   <tr>
-                    <td>Retired First Batter:</td>
+                    <td>Retired first batter:</td>
                     <td class="td-in">
                       <input id="in_retired_first_batter" type="checkbox">
                     </td>
@@ -96,14 +102,14 @@
                     </td>
                   </tr>
                   <tr>
-                    <td>Ended Inning:</td>
+                    <td>Ended inning:</td>
                     <td class="td-in">
                       <input id="in_ended_inning" type="checkbox">
                     </td>
                   </tr>
                   <tr>
                     <td colspan="2" class="td-in">
-                      <a class="pure-button" href="#">Submit</a>
+                      <a class="pure-button" onclick="submitEntry()">Submit</a>
                     </td>
                   </tr>
                 </tbody>

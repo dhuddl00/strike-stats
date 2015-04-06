@@ -67,13 +67,17 @@ class GameListPageController(webapp2.RequestHandler):
 class GamePageController(webapp2.RequestHandler):
     def get(self, game_id):
         game = Game.get_by_id(int(game_id))
-        pitchers = Pitcher.all() #["Bob Jackson", "Sam Walters", "Mike Stevens"]
+        pitchers = []
+        for p in Pitcher.all():
+          pitchers.append({'name':p.name, 'id':str(p.key().id_or_name())})
+#        pitchers = Pitcher.all() #["Bob Jackson", "Sam Walters", "Mike Stevens"]
 
         template_values = {
             'program_name': game.program.name,
             'opponent_name': game.opponent,
             'pitchers': pitchers,
             'innings': range(1,9),
+            'game_id': game_id,
         }
 
         path = os.path.join(os.path.dirname(__file__), 'game.html')
@@ -116,7 +120,7 @@ class ApiPitcherListController(webapp2.RequestHandler):
         js = self.request.body
         jo = json.loads(js)
         jo['create_time']=datetime.datetime.now()
-        p=Program.get_by_id(jo['program_id'])
+        p=Program.get_by_id(int(jo['program_id']))
         se = Pitcher(program=p,**jo)
         se.put() 
         self.response.headers['Content-Type'] = 'application/json'
@@ -138,7 +142,7 @@ class ApiGameListController(webapp2.RequestHandler):
         js = self.request.body
         jo = json.loads(js)
         jo['create_time']=datetime.datetime.now()
-        p=Program.get_by_id(jo['program_id'])
+        p=Program.get_by_id(int(jo['program_id']))
         #jo.pop('program',None)
         se = Game(program=p,**jo)
         se.put() 
@@ -161,8 +165,10 @@ class ApiPitcherInningListController(webapp2.RequestHandler):
         js = self.request.body
         jo = json.loads(js)
         jo['create_time']=datetime.datetime.now()
-        g=Game.get_by_id(jo['game_id'])
-        p=Pitcher.get_by_id(jo['pitcher_id'])
+        g=Game.get_by_id(int(jo['game_id']))
+        p=Pitcher.get_by_id(int(jo['pitcher_id']))
+        jo['strikeouts'] = int(jo['strikeouts'])
+        jo['inning'] = int(jo['inning'])
         se = PitcherInning(game=g,pitcher=p,**jo)
         se.put() 
         self.response.headers['Content-Type'] = 'application/json'
