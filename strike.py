@@ -149,6 +149,18 @@ class ApiGameListController(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'application/json'
         self.response.write(js)
         
+class ApiGamePitcherInningListController(webapp2.RequestHandler):
+    def get(self, game_id):
+        g = Game.get_by_id(int(game_id))
+        entries = db.GqlQuery("SELECT * FROM PitcherInning WHERE game = :1", g)
+        self.response.headers['Content-Type'] = 'application/json'
+        nlist = []
+        for entry in entries:
+          o = entry.to_dict()
+          o["pitcher_name"] = entry.pitcher.name
+          nlist.append(o)
+        self.response.write(json.dumps([e for e in nlist]))
+
 class ApiPitcherInningController(webapp2.RequestHandler):
     def get(self, pitcher_inning_id):
         e = PitcherInning.get_by_id(int(pitcher_inning_id))
@@ -244,6 +256,7 @@ application = webapp2.WSGIApplication(
      ('/api/Programs/(\d+)', ApiProgramController),
      ('/api/Games', ApiGameListController),
      ('/api/Games/(\d+)', ApiGameController),
+     ('/api/Games/(\d+)/PitcherInnings', ApiGamePitcherInningListController),
      ('/api/Pitchers', ApiPitcherListController),
      ('/api/Pitchers/(\d+)', ApiPitcherController)
     ], debug=True)

@@ -5,21 +5,40 @@ Array.prototype.diff = function(a) {
 
 //BEGIN REFRESH ENTRIES\\
 function refreshEntriesTable() {
-  url = "../api/Games";
+  game_id = getFormValues(["game_id"])["game_id"];
+  url = "../api/Games/"+game_id+"/PitcherInnings";
+  
   $.ajax({
     url: url,
     success: handleRefreshEntries,
     error: function(jqXHR, textStatus, errorThrown) {
-      window.alert("post error: " + textStatus);
+      window.alert("get error: " + errorThrown + ", url: " + url);
     }
   });
 }
 
 function handleRefreshEntries(data) {
-  for (i=0; i<data.length; i++) {
-    var e = data[i];
-    $("<tr></tr>").append("<td>"+e.opponent+"</td><td>"+e.game_date+"</td>").appendTo( '#entries-table tbody' );
+  FIELDS = ["inning","pitcher_name","shutdown_inning","less_than_13_pitches",
+            "retired_first_batter","three_and_out","strikeouts","ended_inning"];
+  thHtml="";
+  for (ii=0; ii<FIELDS.length; ii++) {
+    thHtml+="<th>"+FIELDS[ii]+"</th>";
   }
+  $( '#entries-table thead' ).html($("<tr></tr>").append(thHtml));
+  $( '#entries-table tbody' ).html("");
+  for (i=0; i<data.length; i++) {
+    tdHtml = "";
+    for (ii=0; ii<FIELDS.length; ii++) {
+      tdHtml+="<td>"+data[i][FIELDS[ii]]+"</td>";
+    }
+    $("<tr></tr>").append(tdHtml).appendTo( '#entries-table tbody' );
+  }
+}
+
+function markupTableData(e) {
+  return "<td>"+e.inning+"</td>"+
+         "<td>"+e.pitcher_name+"</td>"+
+         "<td>"+e.shutdown_inning+"</td>"
 }
 //END REFRESH ENTRIES\\
 
@@ -31,10 +50,7 @@ function submitEntry() {
 
   //extract values from form
   var entryMap = getFormValues(FIELDS);
-  window.alert("diff: " + FIELDS.diff(["game_id","inning","pitcher_id"]));
   clearFormValues(FIELDS.diff(["game_id","inning","pitcher_id"]));
-
-  window.alert("form: " + JSON.stringify(entryMap)); 
 
   $.ajax({
     type: "POST",
@@ -42,11 +58,10 @@ function submitEntry() {
     data: JSON.stringify(entryMap),
     dataType: "json",
     success: function(data, textStatus, jqXHR) {
-      window.alert("post success: " + JSON.stringify(data) + " | " + textStatus);
       refreshEntriesTable();
     },
     error: function(jqXHR, textStatus, errorThrown) {
-      window.alert("post error: " + textStatus);
+      window.alert("post error: " + textStatus + ", url: " + "../api/PitcherInnings");
     }
   });
 

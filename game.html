@@ -27,7 +27,7 @@
       }
     </style>
   </head>
-  <body>
+  <body onload="refreshEntriesTable()">
     <div class="div-page">
       <div id="div-teams" class="row h2">
          <span class="div-teams-content">{{program_name}}</span>
@@ -119,6 +119,7 @@
         </div>
         <div id="div-entries-table" class="col-sm-4">
               <table id="entries-table" class="pure-table pure-table-bordered">
+              <thead></thead>
               <tbody></tbody>
             </table>
         </div>
