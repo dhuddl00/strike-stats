@@ -17,6 +17,10 @@ function refreshEntriesTable() {
   });
 }
 
+function updateStrikeoutsValueBox(newValue) {
+  $( '#strikeouts_value_box' ).html(newValue);
+}
+
 function handleRefreshEntries(data) {
   FIELDS = ["inning","pitcher_name","shutdown_inning","less_than_13_pitches",
             "retired_first_batter","three_and_out","strikeouts","ended_inning"];

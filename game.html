@@ -9,7 +9,7 @@
     <script src="../static/game.js"></script>
     <style>
       .td-in {
-        text-align:center
+        text-align:left
       }
       .float-left {
         float: left;
@@ -24,6 +24,35 @@
       }
       .div-page {
         padding-left: 25px;
+      }
+      .form-label {
+        padding-left: 10px;
+      }
+      label {
+        display: block;
+        padding-left: 15px;
+        text-indent: -15px;
+        font-weight: normal !important;
+      }
+      input {
+          width: 13px;
+          height: 13px;
+          padding: 0;
+          margin:0;
+          vertical-align: bottom;
+          position: relative;
+          top: -1px;
+          *overflow: hidden;
+      }
+      input[type=range] {
+        display: inline;
+        width: 100px;
+        border-radius: 50%;
+        margin-top: 0px;
+      }
+      li 
+      {
+        list-style-type: none;
       }
     </style>
   </head>
@@ -40,75 +69,46 @@
             <fieldset>
               <table class="pure-table pure-table-bordered">
                 <tbody>
-                  <tr>
-                    <td>Game:</td>
+                  <tr hidden>
                     <td class="td-in">
                       <input id="in_game_id" type="text" value="{{ game_id }}" readonly></input>
                     </td>
                   </tr>
                   <tr>
-                    <td>Inning:</td>
                     <td class="td-in">
-                      <select id="in_inning">
+                      <label>Inning: <select id="in_inning">
                       {% for inning in innings %}
                         <option>{{ inning }}</option>
                       {% endfor %}
-                      </select>
+                      </select></label>
                     </td>
-                  </tr>
-                  <tr>
-                    <td>Pitcher:</td>
                     <td class="td-in">
+                      <label>Pitcher:
                       <select id="in_pitcher_id">
                         {% for pitcher in pitchers %}
                         <option value="{{ pitcher.id }}"> {{ pitcher.name }}</option>
                         {% endfor %}
-                      </select>
+                      </select></label>
                     </td>
                   </tr>
                   <tr>
-                    <td>Shutdown:</td>
-                    <td class="td-in">
-                      <input id="in_shutdown_inning" type="checkbox">
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Less than 13 pitches:</td>
-                    <td class="td-in">
-                      <input id="in_less_than_13_pitches" type="checkbox">
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Retired first batter:</td>
-                    <td class="td-in">
-                      <input id="in_retired_first_batter" type="checkbox">
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Three and out:</td>
-                    <td class="td-in">
-                      <input id="in_three_and_out" type="checkbox">
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Strikeouts:</td>
-                    <td class="td-in">
-                      <select id="in_strikeouts">
-                        <option>0</option>
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                      </select>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Ended inning:</td>
-                    <td class="td-in">
-                      <input id="in_ended_inning" type="checkbox">
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colspan="2" class="td-in">
+                    <td colspan=2 class="td-in">
+                      <li><label><input id="in_shutdown_inning" type="checkbox"> Shutdown inning</label></li>
+                      <li><label><input id="in_less_than_13_pitches" type="checkbox"> Less than 13 pitches</label></li>
+                      <li><label><input id="in_retired_first_batter" type="checkbox"> Retired first batter</label></li>
+                      <li><label><input id="in_three_and_out" type="checkbox"> Three and out</label></li>
+                      <li>
+                        <label>
+                          <span id="strikeouts_value_box" style="padding-left:2px;background-color:#d3d3d3">0</span>
+                          <span style="padding-left:4px">Strikeouts</span>
+                          <div style="padding-left:15px">
+                            <input type="range" id="in_strikeouts" min="0" max="3" value="0" 
+                              onchange="updateStrikeoutsValueBox(this.value)">
+                          </div> 
+                        </label>
+                      </li>
+                      <li><label><input id="in_ended_inning" type="checkbox"> Ended inning</label></li>
+                    <td colspan=2 class="td-in">
                       <a class="pure-button" onclick="submitEntry()">Submit</a>
                     </td>
                   </tr>
