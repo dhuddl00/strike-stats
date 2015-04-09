@@ -21,40 +21,54 @@ function updateStrikeoutsValueBox(newValue) {
   $( '#strikeouts_value_box' ).html(newValue);
 }
 
+
 function handleRefreshEntries(data) {
-  FIELDS = ["inning","pitcher_name","shutdown_inning","less_than_13_pitches",
+  var FIELDS = ["inning","pitcher_name","shutdown_inning","less_than_13_pitches",
             "retired_first_batter","three_and_out","strikeouts","ended_inning"];
-  thHtml="";
+
+  //Sort data in appropriate order
+  data = data.sort(function(a,b) { 
+      var aKey = a.inning + a.pitcher_name;
+      var bKey = b.inning + b.pitcher_name;
+      //window.alert("aKey: " + aKey + ", bKey: " + bKey);
+      return aKey.localeCompare(bKey); 
+        } );
+  
+  headHtml="<tr>";
   for (ii=0; ii<FIELDS.length; ii++) {
-    thHtml+="<th>"+FIELDS[ii]+"</th>";
+    headHtml+='<th>'+FIELDS[ii].replace(/_/g," ")+"</th>";
   }
-  $( '#entries-table thead' ).html($("<tr></tr>").append(thHtml));
-  $( '#entries-table tbody' ).html("");
+  headHtml+="</tr>";
+  $( '#entries-table thead' ).html(headHtml);
+
+  bodyHtml="";
   for (i=0; i<data.length; i++) {
-    tdHtml = "";
+    bodyHtml += "<tr>";
     for (ii=0; ii<FIELDS.length; ii++) {
-      tdHtml+="<td>"+data[i][FIELDS[ii]]+"</td>";
+      d = data[i][FIELDS[ii]];
+      val = "";
+      if (typeof d == "boolean") {
+        if (d) { val = "X"; } else { val = " "; } 
+      } else {
+        val = d;
+      }
+
+      bodyHtml+='<td class="center">'+ val +"</td>";
     }
-    $("<tr></tr>").append(tdHtml).appendTo( '#entries-table tbody' );
+    bodyHtml += "</tr>";
+  $( '#entries-table tbody' ).html(bodyHtml);
   }
 }
 
-function markupTableData(e) {
-  return "<td>"+e.inning+"</td>"+
-         "<td>"+e.pitcher_name+"</td>"+
-         "<td>"+e.shutdown_inning+"</td>"
-}
 //END REFRESH ENTRIES\\
 
 //BEGIN CREATE NEW ENTRY\\
 function submitEntry() {
-  var FIELDS = ["game_id","inning","pitcher_id","shutdown_inning",
-                "less_than_13_pitches","retired_first_batter",
-                "three_and_out","strikeouts","ended_inning"];
-
+  var FIELDS = ["game_id","inning","pitcher_id","shutdown_inning","less_than_13_pitches",
+            "retired_first_batter","three_and_out","strikeouts","ended_inning"];
   //extract values from form
   var entryMap = getFormValues(FIELDS);
-  clearFormValues(FIELDS.diff(["game_id","inning","pitcher_id"]));
+    //window.alert("data: " + JSON.stringify(entryMap));
 
   $.ajax({
     type: "POST",
@@ -62,14 +76,13 @@ function submitEntry() {
     data: JSON.stringify(entryMap),
     dataType: "json",
     success: function(data, textStatus, jqXHR) {
+      clearFormValues(FIELDS.diff(["game_id","inning","pitcher_id"]));
       refreshEntriesTable();
     },
     error: function(jqXHR, textStatus, errorThrown) {
       window.alert("post error: " + textStatus + ", url: " + "../api/PitcherInnings");
     }
   });
-
-  
 }
 
 function getFormValues(fields) {
@@ -90,17 +103,16 @@ function getFormValues(fields) {
 function clearFormValues(fields) {
   for (i=0; i<fields.length; i++) {
     var e = $("#in_"+fields[i]);
-    var val = null;
     if (e.prop('type') == "checkbox") {
       e.prop('checked',false);
     } else if (e.prop('type') == "select-one") {
-//      window.alert("select one: " + e[0].prop('value'));
-//      e[0].selectedIndex = 0;
-      //e.filter(":first").prop('selected',true);
       //TODO: Fix this to be dynamic
-      val = e.val('');  
+      e.val('');  
+    } else if (e.prop('type') == "range") {
+      e.val(0);  
+      updateStrikeoutsValueBox(0); 
     } else {
-      val = e.val('');  
+      e.val('');  
     }
   }
   return 0;

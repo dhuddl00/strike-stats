@@ -181,10 +181,23 @@ class ApiPitcherInningListController(webapp2.RequestHandler):
         p=Pitcher.get_by_id(int(jo['pitcher_id']))
         jo['strikeouts'] = int(jo['strikeouts'])
         jo['inning'] = int(jo['inning'])
+        #logging.debug("value of my g ")
+        #check for uniqueness
+        #entries = db.GqlQuery("SELECT * FROM PitcherInning WHERE game = :1 AND pitcher = :2 AND inning = :3", g, p, jo['inning'])
+
+        resp = ""
+        #if len(entries) == 0:
         se = PitcherInning(game=g,pitcher=p,**jo)
         se.put() 
+        #resp = js
+        resp = json.dumps(se.to_dict())
+        #resp = json.dumps(g.to_dict())
+        #else:
+        #  resp = '{"msg":"ERROR: This Inning and Pitcher combo already exists for this game"}'
+        self.response.headers.add_header("Access-Control-Allow-Origin", "*") 
+        self.response.headers.add_header("Access-Control-Allow-Headers", "x-requested-with") 
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.write(js)
+        self.response.write(resp)
         
 class Program(db.Model):
   name = db.StringProperty(required=True)
@@ -236,8 +249,6 @@ def model_to_dict(model):
       output[key] = value
     elif isinstance(value, datetime.date):
       output[key] = str(value)
-    elif isinstance(value, db.GeoPt):
-      output[key] = {'lat': value.lat, 'lon': value.lon}
     elif isinstance(value, db.Model):
       output[key] = value.key().id_or_name()
     else:
