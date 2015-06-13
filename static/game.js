@@ -5,6 +5,7 @@ Array.prototype.diff = function(a) {
 
 //BEGIN REFRESH ENTRIES\\
 function refreshEntriesTable() {
+  console.log("refreshEntriesTable()");
   game_id = getFormValues(["game_id"])["game_id"];
   url = "../api/Games/"+game_id+"/PitcherInnings";
   
@@ -21,8 +22,8 @@ function updateStrikeoutsValueBox(newValue) {
   $( '#strikeouts_value_box' ).html(newValue);
 }
 
-
 function handleRefreshEntries(data) {
+  console.log("handleRefreshEntries(): " + JSON.stringify(data));
   var FIELDS = ["inning","pitcher_name","shutdown_inning","less_than_13_pitches",
             "retired_first_batter","three_and_out","strikeouts","ended_inning"];
 
@@ -36,7 +37,7 @@ function handleRefreshEntries(data) {
   
   headHtml="<tr>";
   for (ii=0; ii<FIELDS.length; ii++) {
-    headHtml+='<th>'+FIELDS[ii].replace(/_/g," ")+"</th>";
+    headHtml+='<th class="h5">'+FIELDS[ii].replace(/_/g," ")+"</th>";
   }
   headHtml+="</tr>";
   $( '#entries-table thead' ).html(headHtml);
@@ -48,7 +49,14 @@ function handleRefreshEntries(data) {
       d = data[i][FIELDS[ii]];
       val = "";
       if (typeof d == "boolean") {
-        if (d) { val = "X"; } else { val = " "; } 
+        if (d) { val = "&#10004;"; } else { val = " "; } 
+      } else if (FIELDS[ii] == 'strikeouts') {
+        s = "&#10008";
+        if (d == 0) val = " ";
+          else if (d == 1) val = s;
+          else if (d == 2) val = s+s;
+          else if (d == 3) val = s+s+s;
+          else val = "ERROR";
       } else {
         val = d;
       }
@@ -64,11 +72,12 @@ function handleRefreshEntries(data) {
 
 //BEGIN CREATE NEW ENTRY\\
 function submitEntry() {
+  console.log("submitEntry()");
   var FIELDS = ["game_id","inning","pitcher_id","shutdown_inning","less_than_13_pitches",
             "retired_first_batter","three_and_out","strikeouts","ended_inning"];
   //extract values from form
   var entryMap = getFormValues(FIELDS);
-    //window.alert("data: " + JSON.stringify(entryMap));
+  //window.alert("data: " + JSON.stringify(entryMap));
 
   $.ajax({
     type: "POST",
@@ -76,8 +85,8 @@ function submitEntry() {
     data: JSON.stringify(entryMap),
     dataType: "json",
     success: function(data, textStatus, jqXHR) {
-      clearFormValues(FIELDS.diff(["game_id","inning","pitcher_id"]));
       refreshEntriesTable();
+      clearFormValues(FIELDS.diff(["game_id","inning","pitcher_id"]));
     },
     error: function(jqXHR, textStatus, errorThrown) {
       window.alert("post error: " + textStatus + ", url: " + "../api/PitcherInnings");

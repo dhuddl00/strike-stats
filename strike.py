@@ -11,7 +11,7 @@ from google.appengine.api import users
 HEADER_HTML='''
 <html>
     <head>
-        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
         <style>
           .center {
             margin-left: auto;
@@ -22,14 +22,13 @@ HEADER_HTML='''
         </style>
     </head>
     <body>
-        <div style="padding-left:25px">
-            <div>
-                <h1>S.T.R.I.K.E</h1>
-            </div>
+      <div style="padding-left:25px" class="div-page container-fluid">
+        <div class="row h1">S.T.R.I.K.E</div>
 '''
 
 FOOTER_HTML='''
         </div>
+      </div>
     </body>
 </html>
 '''
@@ -41,7 +40,7 @@ class MainPageController(webapp2.RequestHandler):
 
 class GameListPageController(webapp2.RequestHandler):
     def get(self):
-        body_html = '''<table class="pure-table pure-table-bordered">
+        body_html = '''<table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>Program</th>
@@ -68,6 +67,7 @@ class GamePageController(webapp2.RequestHandler):
     def get(self, game_id):
         game = Game.get_by_id(int(game_id))
         pitchers = []
+        #TODO: Limit pitchers to this program only
         for p in Pitcher.all():
           pitchers.append({'name':p.name, 'id':str(p.key().id_or_name())})
 #        pitchers = Pitcher.all() #["Bob Jackson", "Sam Walters", "Mike Stevens"]
@@ -81,6 +81,46 @@ class GamePageController(webapp2.RequestHandler):
         }
 
         path = os.path.join(os.path.dirname(__file__), 'game.html')
+        self.response.out.write(template.render(path, template_values))
+
+class ProgramListPageController(webapp2.RequestHandler):
+    def get(self):
+        body_html = '''<div class="row"><div class="col-xs-5">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Program</th>
+                                <th>Link</th>
+                            </tr>
+                        </thead>'''  
+        body_html += '<tbody>'
+        for e in Program.all():
+            body_html += '<tr><td>' + str(e.name) + \
+                        '</td><td><a href="' + webapp2.uri_for('programs')  + "/" + str(e.key().id_or_name()) + '">Go</a></td></tr>'
+        body_html += '</tbody></table></div></div>' 
+        #template_values = {
+        #    'game_html': body_html
+        #}
+        #path = os.path.join(os.path.dirname(__file__), 'gamelist.html')
+        #self.response.out.write(template.render(path, template_values))
+        self.response.out.write(HEADER_HTML + body_html + FOOTER_HTML)
+
+class ProgramPageController(webapp2.RequestHandler):
+    def get(self, program_id):
+        program = Program.get_by_id(int(program_id))
+        pitchers = []
+        #TODO: Limit pitchers to this program only
+        for p in Pitcher.all():
+          pitchers.append({'name':p.name, 'id':str(p.key().id_or_name())})
+#        pitchers = Pitcher.all() #["Bob Jackson", "Sam Walters", "Mike Stevens"]
+
+        template_values = {
+            'program_id': program.key().id_or_name(),
+            'program_name': program.name,
+            'pitchers': pitchers,
+        }
+
+        path = os.path.join(os.path.dirname(__file__), 'program.html')
         self.response.out.write(template.render(path, template_values))
 
 class ApiProgramController(webapp2.RequestHandler):
@@ -100,9 +140,9 @@ class ApiProgramListController(webapp2.RequestHandler):
         jo = json.loads(js)
         jo['create_time']=datetime.datetime.now()
         se = Program(**jo)
-        se.put() 
+        k = se.put() 
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.write(js)
+        self.response.write(json.dumps(Program.get(k).to_dict()))
         
 class ApiPitcherController(webapp2.RequestHandler):
     def get(self, pitcher_id):
@@ -122,9 +162,9 @@ class ApiPitcherListController(webapp2.RequestHandler):
         jo['create_time']=datetime.datetime.now()
         p=Program.get_by_id(int(jo['program_id']))
         se = Pitcher(program=p,**jo)
-        se.put() 
+        k = se.put() 
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.write(js)
+        self.response.write(json.dumps(Pitcher.get(k).to_dict()))
 
 class ApiGameController(webapp2.RequestHandler):
     def get(self, game_id):
@@ -145,9 +185,9 @@ class ApiGameListController(webapp2.RequestHandler):
         p=Program.get_by_id(int(jo['program_id']))
         #jo.pop('program',None)
         se = Game(program=p,**jo)
-        se.put() 
+        k = se.put() 
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.write(js)
+        self.response.write(json.dumps(Game.get(k).to_dict()))
         
 class ApiGamePitcherInningListController(webapp2.RequestHandler):
     def get(self, game_id):
@@ -181,13 +221,10 @@ class ApiPitcherInningListController(webapp2.RequestHandler):
         p=Pitcher.get_by_id(int(jo['pitcher_id']))
         jo['strikeouts'] = int(jo['strikeouts'])
         jo['inning'] = int(jo['inning'])
-        #logging.debug("value of my g ")
-        #check for uniqueness
-        #entries = db.GqlQuery("SELECT * FROM PitcherInning WHERE game = :1 AND pitcher = :2 AND inning = :3", g, p, jo['inning'])
 
         resp = ""
         #if len(entries) == 0:
-        se = PitcherInning(game=g,pitcher=p,**jo)
+        se = PitcherInning(parent=g,game=g,pitcher=p,**jo)
         se.put() 
         #resp = js
         resp = json.dumps(se.to_dict())
@@ -261,6 +298,8 @@ application = webapp2.WSGIApplication(
     [webapp2.Route('/', handler=MainPageController, name='home'),
      webapp2.Route('/Games', handler=GameListPageController, name='games'),
      ('/Games/(\d+)', GamePageController),
+     webapp2.Route('/Programs', handler=ProgramListPageController, name='programs'),
+     ('/Programs/(\d+)', ProgramPageController),
      ('/api/PitcherInnings', ApiPitcherInningListController),
      ('/api/PitcherInnings/(\d+)', ApiPitcherInningController),
      ('/api/Programs', ApiProgramListController),

@@ -1,11 +1,8 @@
 <html>
   <head>
     <title>S.T.R.I.K.E</title>
-    <link rel="stylesheet" href="//yui.yahooapis.com/pure/0.6.0/pure-min.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//cdn.datatables.net/1.10.6/css/jquery.dataTables.min.css">
     <script src="../static/jquery-2.1.3.min.js"></script>
-    <script src="//cdn.datatables.net/1.10.6/js/jquery.dataTables.min.js"></script>
     <script src="../static/game.js"></script>
     <style>
       .td-in {
@@ -26,10 +23,14 @@
         padding: 5px;
       }
       .div-page {
-        padding-left: 25px;
+        padding-left: 20px;
       }
       .form-label {
         padding-left: 10px;
+      }
+      th {
+        text-transform:capitalize;
+        text-align:center;
       }
       label {
         display: block;
@@ -70,7 +71,7 @@
         <div id="div-form" class="col-md-2">
           <form>
             <fieldset>
-              <table class="table">
+              <table class="table table-condensed">
                 <tbody>
                   <tr hidden>
                     <td class="td-in">
@@ -98,13 +99,14 @@
                         </label>
                       </li>
                       <li><label><input id="in_shutdown_inning" type="checkbox"> Shutdown inning</label></li>
-                      <li><label><input id="in_less_than_13_pitches" type="checkbox"> Less than 13 pitches</label></li>
+                      <li><label><input id="in_less_than_13_pitches" type="checkbox"> &lt 13 pitches</label></li>
                       <li><label><input id="in_retired_first_batter" type="checkbox"> Retired first batter</label></li>
                       <li><label><input id="in_three_and_out" type="checkbox"> Three and out</label></li>
                       <li>
                         <label>
-                          <span id="strikeouts_value_box" style="padding-left:2px;border:1px solid black;">0</span>
-                          <span style="padding-left:4px">Strikeouts</span>
+                          <!--span style="box-shadow:0px 0px 2px #808080;" id="strikeouts_value_box">0</span-->
+                          <span style="padding-left:20px">Strikeouts: </span>
+                            <span id="strikeouts_value_box" class="h4" style="padding-left:5px">0</span>
                           <div style="padding-left:20px">
                             <input type="range" id="in_strikeouts" min="0" max="3" value="0" 
                               onchange="updateStrikeoutsValueBox(this.value)">
@@ -112,6 +114,7 @@
                         </label>
                       </li>
                       <li><label><input id="in_ended_inning" type="checkbox"> Ended inning</label></li>
+                    </td>
                   </tr>
                   </tr>
                     <td class="td-in" style="text-align:center">
@@ -124,10 +127,12 @@
           </form>
         </div>
         <div id="div-entries-table" class="col-md-10">
+          <small>
               <table id="entries-table" class="table table-striped table-condensed table-bordered">
               <thead></thead>
               <tbody></tbody>
             </table>
+          </small>
         </div>
       </div>
     </div>
