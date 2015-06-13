@@ -1,0 +1,92 @@
+<html>
+  <head>
+    <title>S.T.R.I.K.E</title>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <script src="../static/jquery-2.1.3.min.js"></script>
+    <script src="../static/program.js"></script>
+    <style>
+      .center {
+        text-align:center
+      }
+      .div-teams-content {
+        padding: 5px;
+      }
+      .div-page {
+        padding-left: 20px;
+      }
+      .form-label {
+        padding-left: 10px;
+      }
+    </style>
+  </head>
+  <body onload="loadPage()">
+    <div class="div-page container-fluid">
+      <div id="div-teams" class="row h2 center">
+         <span class="div-teams-content">{{program_name}}</span>
+      </div>
+      <div id="div-game-row" class="row">
+        <div id="div-game-form" class="col-md-2">
+          <form>
+            <table class="table table-condensed">
+              <tbody>
+                <tr hidden>
+                  <td>
+                    <input id="in_program_id" type="text" value="{{ program_id }}" readonly></input>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <label>Opponent Name: <input id="in_opponent" type="text"></label>
+                    <label>Game Date: <input id="in_game_date" type="text"></label>
+                  </td>
+                </tr>
+                </tr>
+                  <td style="text-align:center">
+                    <a class="btn btn-default" onclick="addGame()">Add</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+        </div>
+        <div id="div-games-table" class="col-md-10">
+          <small>
+              <table id="games-table" class="table table-striped table-condensed table-bordered">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </small>
+        </div>
+      </div>
+      <div id="div-pitcher-row" class="row">
+        <div id="div-pitcher-form" class="col-md-2">
+          <form>
+            <table class="table table-condensed">
+              <tbody>
+                <tr>
+                  <td>
+                    <label>Pitcher Name: <input id="in_name" type="text"></label>
+                  </td>
+                </tr>
+                </tr>
+                  <td style="text-align:center">
+                    <a class="btn btn-default" onclick="addGame()">Add</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
+        </div>
+        <div id="div-pitchers-table" class="col-md-10">
+          <small>
+              <table id="pitchers-table" class="table table-striped table-condensed table-bordered">
+              <thead></thead>
+              <tbody></tbody>
+            </table>
+          </small>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
